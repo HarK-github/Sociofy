@@ -17,7 +17,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json({limit: "15mb"}));
+app.use(express.json({limit: "10mb"}));
 
 
 mongoose.connect(process.env.MONGO_URL)
