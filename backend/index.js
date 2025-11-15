@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const userModel = require("./models/user");
 const postRoutes = require("./routes/postRoutes");
+const userRoutes = require("./routes/userRoutes");
 require("dotenv").config();
 
 const app = express();
@@ -27,6 +28,7 @@ mongoose.connect(process.env.MONGO_URL)
 const JWT_SECRET = process.env.JWT_SECRET;
 
 app.use("/api/posts", postRoutes);
+app.use("/api/users", userRoutes);
 
 // Registrating user
 app.post("/register", async (req, res) => {
