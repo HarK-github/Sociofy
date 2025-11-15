@@ -45,11 +45,65 @@ router.post("/", authenticateUser, async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
-    const posts = await postModel.find().populate("user", "name email");
+    const posts = await postModel.find().populate("user", "name email").populate("comments.user", "name email").sort({ createdAt: -1 });
     res.json(posts);
   } catch (err) {
-    res.status(500).json({ message: "Error fetching posts" });
+    res.status(500).json({ message: "Error fetching posts", err });
   }
 });
+
+router.post("/:postId/like", authenticateUser, async (req, res) => {
+  try {
+    const post = await postModel.findById(req.params.postId);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    const userId = req.user.id;
+    const isLiked = post.likes.includes(userId);
+
+    if (isLiked) {
+      // Unlike
+      post.likes.pull(userId);
+    } else {
+      // Like
+      post.likes.push(userId);
+    }
+
+    await post.save();
+    res.json({ likesCount: post.likes.length, liked: !isLiked });
+  } catch (err) {
+    res.status(500).json({ message: "Error liking post", err });
+  }
+});
+
+
+router.post("/:postId/comment", authenticateUser, async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ message: "Comment text required" });
+
+    const post = await postModel.findById(req.params.postId);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    const comment = {
+      user: req.user.id,
+      text,
+      createdAt: new Date(),
+    };
+
+    post.comments.push(comment);
+    await post.save();
+
+    const populatedPost = await postModel.findById(post._id)
+      .populate("user", "name email")
+      .populate("comments.user", "name email");
+
+    res.status(201).json(populatedPost);
+  } catch (err) {
+    res.status(500).json({ message: "Error adding comment", err });
+  }
+});
+
+
+
 
 module.exports = router;
