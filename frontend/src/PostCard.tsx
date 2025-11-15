@@ -4,6 +4,7 @@ import axios from "axios";
 interface Post {
   _id: string;
   user: { username: string };
+  userId: string;
   timestamp: string;
   caption?: string;
   image?: string;
@@ -11,7 +12,17 @@ interface Post {
   comments?: { user: string; text: string }[] | string[];
 }
 
-const PostCard = ({ post }: { post: Post }) => {
+const PostCard = ({
+  post,
+  currentUser,
+  handleFollow,
+  handleUnfollow,
+}: {
+  post: Post;
+  currentUser: any;
+  handleFollow: (id: string) => void;
+  handleUnfollow: (id: string) => void;
+}) => {
   const [showMenu, setShowMenu] = useState(false);
 
   const [likes, setLikes] = useState(post.likes || []);
@@ -21,8 +32,10 @@ const PostCard = ({ post }: { post: Post }) => {
 
   const [liked, setLiked] = useState(false);
 
-  // NEW: show/hide full comment list
   const [showComments, setShowComments] = useState(false);
+
+  const isOwner = currentUser._id === post.userId;
+  const isFollowing = currentUser.following?.includes(post.userId);
 
   const handleLike = async () => {
     try {
@@ -74,6 +87,7 @@ const PostCard = ({ post }: { post: Post }) => {
           </div>
         </div>
 
+        {/* MENU */}
         <div className="relative">
           <button
             onClick={() => setShowMenu(!showMenu)}
@@ -87,19 +101,47 @@ const PostCard = ({ post }: { post: Post }) => {
           </button>
 
           {showMenu && (
-            <div className="absolute right-0 mt-2 w-36 bg-white rounded-md border shadow-md">
-              <button className="block px-4 py-2 text-sm hover:bg-green-50 w-full text-left">
-                Follow
-              </button>
-              <button
-                onClick={handleShare}
-                className="block px-4 py-2 text-sm hover:bg-green-50 w-full text-left"
-              >
-                Share
-              </button>
-              <button className="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left border-t">
-                Report
-              </button>
+            <div className="absolute right-0 mt-2 w-36 bg-white rounded-md border shadow-md z-10">
+              {isOwner ? (
+                <>
+                  <button className="block px-4 py-2 text-sm hover:bg-green-50 w-full text-left">
+                    Edit Post
+                  </button>
+
+                  <button className="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left border-t">
+                    Delete Post
+                  </button>
+                </>
+              ) : (
+                <>
+                  {isFollowing ? (
+                    <button
+                      onClick={() => handleUnfollow(post.userId)}
+                      className="block px-4 py-2 text-sm hover:bg-green-50 w-full text-left"
+                    >
+                      Unfollow
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleFollow(post.userId)}
+                      className="block px-4 py-2 text-sm hover:bg-green-50 w-full text-left"
+                    >
+                      Follow
+                    </button>
+                  )}
+
+                  <button
+                    onClick={handleShare}
+                    className="block px-4 py-2 text-sm hover:bg-green-50 w-full text-left"
+                  >
+                    Share
+                  </button>
+
+                  <button className="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left border-t">
+                    Report
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -114,48 +156,53 @@ const PostCard = ({ post }: { post: Post }) => {
         </div>
       )}
 
-      {/* ACTION BUTTONS */}
+      {/* ACTIONS + CAPTION + COMMENTS */}
       <div className="px-4 py-3">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-4">
-
-            {/* LIKE */}
-            <button
-              onClick={handleLike}
-              className={`transition-all ${
-                liked ? "text-red-500 scale-110" : "text-gray-600"
-              } hover:scale-110`}
+        {/* LIKE + COMMENT */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={handleLike}
+            className={`transition-all ${
+              liked ? "text-red-500 scale-110" : "text-gray-600"
+            } hover:scale-110`}
+          >
+            <svg
+              className="w-6 h-6"
+              fill={liked ? "red" : "none"}
+              stroke={liked ? "red" : "currentColor"}
+              strokeWidth={2}
+              viewBox="0 0 24 24"
             >
-              <svg
-                className="w-6 h-6"
-                fill={liked ? "red" : "none"}
-                stroke={liked ? "red" : "currentColor"}
-                strokeWidth={2}
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
-            </button>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              />
+            </svg>
+          </button>
 
-            {/* COMMENT BUTTON */}
-            <button
-              onClick={() => setShowCommentBox(!showCommentBox)}
-              className="text-gray-600 hover:text-green-600"
+          {/* COMMENT BUTTON */}
+          <button
+            onClick={() => setShowCommentBox(!showCommentBox)}
+            className="text-gray-600 hover:text-green-600"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round"
-                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-            </button>
-
-          </div>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+              />
+            </svg>
+          </button>
         </div>
 
-        {/* LIKE + COMMENT COUNTS */}
+        {/* LIKES + COMMENTS COUNT */}
         <div className="mt-2 text-sm text-gray-600 flex gap-4">
           <p>❤️ {likes.length ? likes.length : likes} Likes</p>
           <p>💬 {comments.length} Comments</p>
@@ -169,7 +216,7 @@ const PostCard = ({ post }: { post: Post }) => {
           </div>
         )}
 
-        {/* SHOW/HIDE COMMENTS BUTTON */}
+        {/* SHOW/HIDE COMMENTS */}
         {comments.length > 0 && (
           <button
             onClick={() => setShowComments(!showComments)}
@@ -184,7 +231,9 @@ const PostCard = ({ post }: { post: Post }) => {
           <div className="mt-3 space-y-2">
             {comments.map((c: any, _id: number) => (
               <div key={c._id} className="text-sm bg-gray-100 rounded-md p-2">
-                <span className="font-semibold">{c.user.name || "User"}: </span>
+                <span className="font-semibold">
+                  {c.user?.name || "User"}:{" "}
+                </span>
                 {c.text || c}
               </div>
             ))}

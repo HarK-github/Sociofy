@@ -7,15 +7,9 @@ import Navbar from "./Navbar";
 const Home = ({ user }) => {
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [posts, setPosts] = useState([]);
-  console.log("User on home page :", user);
+  const [suggestions, setSuggestions] = useState([]);
 
-  const suggestions = [
-    { id: 1, username: "react_girl" },
-    { id: 2, username: "next_dev" },
-    { id: 3, username: "tailwind_pro" },
-    { id: 4, username: "code_ninja" },
-  ];
-
+  const [currentUser, setCurrentUser] = useState(user);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -31,18 +25,54 @@ const Home = ({ user }) => {
     fetchPosts();
   }, [showCreatePost]);
 
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/api/users/");
+        setSuggestions(res.data);
+      } catch (err) {
+        console.error("Error fetching suggestions:", err);
+      }
+    };
+    fetchSuggestions();
+  }, []);
 
-  const handleLike = (postId) => {
-    setPosts((prev) =>
-      prev.map((p) =>
-        p._id === postId ? { ...p, likes: (p.likes || 0) + 1 } : p
-      )
-    );
+
+  const handleFollow = async (targetId) => {
+    try {
+      await axios.post(
+        `http://localhost:3000/api/users/${targetId}/follow`,
+        {},
+        { withCredentials: true }
+      );
+
+ 
+      setCurrentUser((prev) => ({
+        ...prev,
+        following: [...prev.following, targetId],
+      }));
+    } catch (err) {
+      console.error("Follow error:", err);
+    }
   };
 
 
-  const handleComment = (postId, comment) => {
-    console.log("Comment on", postId, ":", comment);
+  const handleUnfollow = async (targetId) => {
+    try {
+      await axios.post(
+        `http://localhost:3000/api/users/${targetId}/unfollow`,
+        {},
+        { withCredentials: true }
+      );
+
+
+      setCurrentUser((prev) => ({
+        ...prev,
+        following: prev.following.filter((id) => id !== targetId),
+      }));
+    } catch (err) {
+      console.error("Unfollow error:", err);
+    }
   };
 
   return (
@@ -128,13 +158,18 @@ const Home = ({ user }) => {
                 key={post._id}
                 post={{
                   user: { username: post.user?.name || "Unknown" },
+                  userId: post.user?._id,
                   timestamp: new Date(post.createdAt).toLocaleString(),
                   caption: post.caption,
-                  image: post.image, // base64 string
+                  image: post.image,
                   likes: post.likes,
                   comments: post.comments,
                   _id: post._id,
                 }}
+                currentUser={currentUser}
+                setCurrentUser={setCurrentUser}
+                handleFollow={handleFollow}
+                handleUnfollow={handleUnfollow}
               />
             ))
           ) : (
@@ -157,22 +192,40 @@ const Home = ({ user }) => {
             <h3 className="font-bold text-gray-800 mb-4 text-sm uppercase tracking-wide">
               Suggested for you
             </h3>
-            <div className="space-y-4">
-              {suggestions.map((user) => (
-                <div key={user.id} className="flex items-center justify-between group">
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-300 to-pink-300 group-hover:scale-105 transition-transform cursor-pointer"></div>
-                    <div>
-                      <p className="font-semibold text-gray-700 text-sm">{user.username}</p>
-                      <p className="text-xs text-gray-400">Suggested for you</p>
+
+            {suggestions
+              .filter((u) => u._id !== currentUser._id) // Hide yourself
+              .map((u) => {
+                const isFollowing = currentUser.following?.includes(u._id);
+
+                return (
+                  <div key={u._id} className="flex items-center justify-between group">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-300 to-pink-300 group-hover:scale-105 transition-transform cursor-pointer"></div>
+                      <div>
+                        <p className="font-semibold text-gray-700 text-sm">{u.name}</p>
+                        <p className="text-xs text-gray-400">{u.email}</p>
+                      </div>
                     </div>
+
+                    {isFollowing ? (
+                      <button
+                        onClick={() => handleUnfollow(u._id)}
+                        className="text-sm text-red-500 hover:text-red-600 font-semibold hover:scale-105 transition-transform"
+                      >
+                        Unfollow
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleFollow(u._id)}
+                        className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold hover:scale-105 transition-transform"
+                      >
+                        Follow
+                      </button>
+                    )}
                   </div>
-                  <button className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold hover:scale-105 transition-transform">
-                    Follow
-                  </button>
-                </div>
-              ))}
-            </div>
+                );
+              })}
 
             <div className="mt-6 pt-6 border-t border-gray-100">
               <p className="text-xs text-gray-400 leading-relaxed">
