@@ -16,9 +16,9 @@ const PostCard = ({ post }: { post: Post }) => {
       {/* Header */}
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-full border-2 border-indigo-500 bg-gradient-to-br from-indigo-400 to-pink-400 hover:scale-105 transition-transform cursor-pointer"></div>
+          <div className="w-11 h-11 rounded-full border-2 border-green-500 bg-gradient-to-br from-green-400 to-pink-400 hover:scale-105 transition-transform cursor-pointer"></div>
           <div>
-            <p className="font-semibold text-gray-900 hover:text-indigo-600 cursor-pointer">
+            <p className="font-semibold text-gray-900 hover:text-green-600 cursor-pointer">
               {post.user.username}
             </p>
             <p className="text-xs text-gray-500">{post.timestamp}</p>
@@ -41,10 +41,10 @@ const PostCard = ({ post }: { post: Post }) => {
           {/* Dropdown Menu */}
           {showMenu && (
             <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-100 rounded-xl shadow-lg z-20 overflow-hidden animate-fadeIn">
-              <button className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 text-sm font-medium transition-colors">
+              <button className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-green-600 text-sm font-medium transition-colors">
                 Follow
               </button>
-              <button className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 text-sm font-medium transition-colors">
+              <button className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-green-600 text-sm font-medium transition-colors">
                 Share
               </button>
               <button className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-red-600 text-sm font-medium transition-colors border-t border-gray-100">
@@ -56,8 +56,8 @@ const PostCard = ({ post }: { post: Post }) => {
       </div>
 
       {/* Post Image Placeholder */}
-      <div className="bg-gradient-to-br from-indigo-50 via-pink-50 to-purple-50 flex items-center justify-center h-96 relative group">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-100/50 to-pink-100/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+      <div className="bg-gradient-to-br from-green-50 via-pink-50 to-purple-50 flex items-center justify-center h-96 relative group">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-100/50 to-pink-100/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
         <span className="text-gray-400 text-sm font-medium z-10">Post Content</span>
       </div>
 
@@ -81,7 +81,7 @@ const PostCard = ({ post }: { post: Post }) => {
               </svg>
             </button>
 
-            <button className="text-gray-600 hover:text-indigo-600 transition-all transform hover:scale-110">
+            <button className="text-gray-600 hover:text-green-600 transition-all transform hover:scale-110">
               <svg
                 className="w-7 h-7"
                 fill="none"
@@ -97,7 +97,7 @@ const PostCard = ({ post }: { post: Post }) => {
               </svg>
             </button>
 
-            <button className="text-gray-600 hover:text-indigo-600 transition-all transform hover:scale-110">
+            <button className="text-gray-600 hover:text-green-600 transition-all transform hover:scale-110">
               <svg
                 className="w-7 h-7"
                 fill="none"
@@ -114,7 +114,7 @@ const PostCard = ({ post }: { post: Post }) => {
             </button>
           </div>
 
-          <button className="text-gray-600 hover:text-indigo-600 transition-all transform hover:scale-110">
+          <button className="text-gray-600 hover:text-green-600 transition-all transform hover:scale-110">
             <svg
               className="w-6 h-6"
               fill="none"
